@@ -1,0 +1,27 @@
+{
+  "name": "DCL-nodeTTS",
+  "version": "1.0.0",
+  "description": "TTSBots of Discord with Voicevox",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tam1192/DCL-nodeTTS.git"
+  },
+  "author": "nikki9750",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tam1192/DCL-nodeTTS/issues"
+  },
+  "homepage": "https://github.com/tam1192/DCL-nodeTTS#readme",
+  "dependencies": {
+    "@enjoyjs/node-mecab": "^0.5.0",
+    "discord.js": "^14.11.0",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.45.0"
+  }
+}

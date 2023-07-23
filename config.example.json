@@ -1,0 +1,11 @@
+{
+    "Discord": {
+        "name": "",
+        "token": ""
+    },
+    "voicevox": {
+        "https": false,
+        "address": "",
+        "port": ""
+    }
+}
