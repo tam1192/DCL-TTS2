@@ -1,12 +1,10 @@
-'use strict';
-
-const path = require('path');
-const loadDirectory = require('./loadDirectory');
+const path = require('path').join;
 const { Collection } = require('discord.js');
+const { loadFiles } = require('dirtools');
 
-module.exports = function() {
+module.exports = async function() {
 	const collection = new Collection();
-	loadDirectory(path.join(__dirname, 'discordInteractions'), file => {
+	await loadFiles(path(__dirname, 'discordInteractions'), file => {
 		// コマンドを読み込む
 		const command = require(file);
 		if ('name' in command && 'data' in command && 'execute' in command) {
