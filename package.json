@@ -17,10 +17,15 @@
   },
   "homepage": "https://github.com/tam1192/DCL-nodeTTS#readme",
   "dependencies": {
+    "@discordjs/voice": "^0.16.0",
     "@enjoyjs/node-mecab": "^0.5.0",
     "dirtools": "github:tam1192/node-dirtools",
     "discord.js": "^14.11.0",
+    "ffmpeg": "^0.0.4",
     "fs-extra": "^11.1.1",
+    "libsodium-wrappers": "^0.7.11",
+    "sequelize": "^6.32.1",
+    "sqlite3": "^5.1.6",
     "voxclient": "github:tam1192/node-voxclient"
   },
   "devDependencies": {

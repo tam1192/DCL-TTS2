@@ -132,3 +132,6 @@ dist
 # config file
 config.json
 settings
+
+test.*
+*.sqlite

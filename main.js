@@ -1,19 +1,15 @@
 'use strict';
-const discord = require('./modules/discord');
 const config = require('./config.json');
-const path = require('path');
-const mkdir = require('./modules/mkdir');
 
-// 設定ファイルを作成・ロードする。
-const settingsPath = mkdir(path.join(__dirname, 'settings'));
+const path = require('path').join;
+const {mkdirSync} = require('fs-extra');
 
-// discord用
-// settings/guilds
-mkdir(path.join(settingsPath, 'guilds'));
-// settings/client
-const clientPath = mkdir(path.join(settingsPath, 'client'));
-// settings/client/command
-mkdir(path.join(clientPath, 'command'));
+const {Sequelize} = require('sequelize');
+const voxClient = require('voxclient').Client;
+const { Client, GatewayIntentBits } = require('discord.js');
+
+const discordEvents = require('./modules/discordEvents');
+const discordInteractions = require('./modules/discordCommands');
 
 // Ctrl+Cでexitするようにする。
 process.once('SIGINT', () => process.exit(0));
@@ -22,4 +18,34 @@ process.once('exit', () => {
 	console.log('end');
 });
 
-discord(config.Discord, settingsPath);
+// クライアントインスタンスの作成
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+
+client.db = new Sequelize({
+	dialect: 'sqlite',
+	storage: path(__dirname, 'db.sqlite'),
+});
+
+try{
+	client.tempdir = mkdirSync(path(__dirname, 'tmp'));
+}
+catch(e){
+	if(e.code!='EEXIST'){
+		console.error(e);
+		process.exit(1);
+	}
+}
+
+client.voicevox = new voxClient(config.voicevox.address);
+client.query = [];
+discordInteractions(client);
+
+(async () => {
+	await Promise.all([
+		discordEvents(client),
+		discordInteractions(client),
+	]);
+
+	// discordにログインする。
+	await client.login(config.Discord.token);
+})();

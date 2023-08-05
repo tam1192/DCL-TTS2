@@ -5,12 +5,13 @@ module.exports = {
 	once: false,
 	async execute(interaction) {
 		const client = interaction.client;
-		const Interactions = client.Interactions;
+		const Interactions = client.Commands;
 
 		// インタラクションの種類
-		// コマンドなら
 		const name = (() => {
-			if (interaction.isChatInputCommand()) {
+			// コマンドなら
+			if (interaction.isChatInputCommand() ||
+				interaction.isContextMenuCommand()) {
 				// コマンド名
 				return interaction.commandName;
 			}
@@ -18,9 +19,6 @@ module.exports = {
 			else if (interaction.isModalSubmit()) {
 				// モーダル名
 				return interaction.customId;
-			}
-			else if (interaction.isContextMenuCommand()) {
-				return interaction.commandName;
 			}
 			// その他
 			else {
