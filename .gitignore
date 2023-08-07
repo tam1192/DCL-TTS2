@@ -135,3 +135,5 @@ settings
 
 test.*
 *.sqlite
+
+tmp
