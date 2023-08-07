@@ -3,6 +3,7 @@
 const { ContextMenuCommandBuilder, SlashCommandBuilder, Routes } = require('discord.js');
 const { statSync } = require('fs-extra');
 const { Model, DataTypes } = require('sequelize');
+const crypto = require('crypto');
 
 module.exports = async(client) => {
 	// Interactions 作成
@@ -22,7 +23,7 @@ module.exports = async(client) => {
 			primaryKey: true,
 		},
 		last: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.STRING,
 			allowNull: false,
 		}
 	}
@@ -35,33 +36,40 @@ module.exports = async(client) => {
 	
 	const cmdeach = (value, key) => {
 		const data = value.data;
-		const dir = value.dir;
-		const mtime = Math.floor(statSync(dir).mtimeMs * 1000);
+		// const dir = value.dir;
+		const mtime = (()=>{
+			return crypto.createHash('sha1')
+					.update(JSON.stringify(data))
+					.digest('hex');
+			// const time = Math.floor(statSync(dir).mtimeMs * 1000);
+		})();
 
 		// 適切か
 		if(data instanceof ContextMenuCommandBuilder||
 		data instanceof SlashCommandBuilder){
-			body.push(value.data.toJSON());
+			body.push(data.toJSON());
 		}
 
 		// profunc
 		const profunc = async() => {
-			const data = await table.findByPk(key);
-			const last = data.dataValues.last;
+			const find = await table.findByPk(key);
 			// データが存在するか
-			if (data == null){
+			if (find == null){
 				table.create({
 					name: key,
 					last: mtime,
 				});
 				throw 0;
-			}
-			// 更新日が新しくなっていないか。
-			else if (last != mtime) {
-					data.update({
-						last: mtime,
-					});
-				throw 0;
+			} 
+			else {
+				const last = find.dataValues.last;
+				// 更新日が新しくなっていないか。
+				if (last != mtime) {
+						find.update({
+							last: mtime,
+						});
+					throw 0;
+				}
 			}
 			return 0;
 		}

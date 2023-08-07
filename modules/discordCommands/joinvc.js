@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { joinVoiceChannel } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioPlayer } = require('@discordjs/voice');
 
 const name = 'joinvc';
 
@@ -17,12 +17,16 @@ module.exports = {
 			const channelname = interaction.member.voice.channel.name;
 			const guildId = interaction.guild.id;
 			const voiceAdapterCreator = interaction.guild.voiceAdapterCreator;
-			joinVoiceChannel({
+			const vc = joinVoiceChannel({
 				channelId: channelId,
 				guildId: guildId,
 				adapterCreator: voiceAdapterCreator,
 				selfDeaf: true,
 			});
+			if(interaction.guild.player == undefined){
+				interaction.guild.player = createAudioPlayer();
+			};
+			vc.subscribe(interaction.guild.player);
 			interaction.guild.textlisten = interaction.channelId;
 		await interaction.editReply(`参加しました：${channelname}\n読み上げます：${interaction.channel.name}`);
 		} catch (error) {

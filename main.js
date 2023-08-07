@@ -7,9 +7,11 @@ const {mkdirSync} = require('fs-extra');
 const {Sequelize} = require('sequelize');
 const voxClient = require('voxclient').Client;
 const { Client, GatewayIntentBits } = require('discord.js');
+const { createAudioPlayer } = require('@discordjs/voice');
 
 const discordEvents = require('./modules/discordEvents');
 const discordInteractions = require('./modules/discordCommands');
+
 
 // Ctrl+Cでexitするようにする。
 process.once('SIGINT', () => process.exit(0));
@@ -26,8 +28,12 @@ client.db = new Sequelize({
 	storage: path(__dirname, 'db.sqlite'),
 });
 
+client.tempdir=path(__dirname, 'tmp')
+
+client.queue = [];
+
 try{
-	client.tempdir = mkdirSync(path(__dirname, 'tmp'));
+	mkdirSync(client.tempdir);
 }
 catch(e){
 	if(e.code!='EEXIST'){
@@ -38,6 +44,7 @@ catch(e){
 
 client.voicevox = new voxClient(config.voicevox.address);
 client.query = [];
+// client.player = createAudioPlayer();
 discordInteractions(client);
 
 (async () => {
