@@ -14,8 +14,8 @@ module.exports = {
 		console.log(message);
 		if(message.channelId == textlisten){
 			const voice = await client.voicevox.createVoice(message.content, 1);
-			const filename = message.content.replace();
-			writeFileSync(path(client.tempdir, message.content), Buffer.from(voice));
+			const filename = message.content;
+			writeFileSync(path(client.tempdir, `${message.content}.wav`), Buffer.from(voice));
 		}
 	},
 };
