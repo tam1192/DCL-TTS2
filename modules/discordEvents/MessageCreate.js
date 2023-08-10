@@ -13,7 +13,6 @@ const columns = {
 	content: {
 		type: DataTypes.STRING,
 		allowNull: false,
-		unique: true,
 	},
 	speaker: {
 		type: DataTypes.INTEGER,
@@ -22,6 +21,17 @@ const columns = {
 	counter: {
 		type: DataTypes.INTEGER,
 	}
+}
+
+const spcu = {
+	userid: {
+		type: DataTypes.INTEGER,
+		primaryKey: true
+	},
+	speaker: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	},
 }
 
 module.exports = {
@@ -35,34 +45,50 @@ module.exports = {
 
 		const client = message.client;
 		const player = guild.player;
-		const queue = client.queue;
+
 		const db = client.db;
 
-		if(message.channelId == textlisten &&
-			content.length > 0){
-			const table = db.define('MessageContent', columns);
-			await db.sync();
+		try{
+			if(message.channelId == textlisten &&
+				content.length > 0){
+				const table = db.define('MessageContent', columns);
+				const table2 = db.define('usersettings', spcu);
+				await db.sync();
 
-			const voiceid = await(async() => {
-				const exist = await table.findOne({where: {content: content, speaker: 1}});
-				if(exist == null){
-					const id = await table.create({content: content, speaker: 1, counter: 0});
-					const voice = await client.voicevox.createVoice(content, 1);
-					const voicepath = path(client.tempdir, `${id.dataValues.id}.wav`);
-					writeFileSync(voicepath, Buffer.from(voice));
-					await db.sync();
-					return voicepath;
-				}
-				else {
-					const voicepath = path(client.tempdir, `${exist.dataValues.id}.wav`);
-					exist.update({
-						counter: (exist.dataValues.counter + 1),
-					});
-					return voicepath
-				}
-			})();
-			const audio = createAudioResource(voiceid, {inlineVolume: true});
-			player.play(audio);
+				const spfind = await table2.findByPk(message.author.id);
+				const speakerid = (()=>{
+					if(spfind == null) {
+						return 1;
+					}
+					else {
+						return spfind.dataValues.speaker;
+					}
+				})();
+
+				const voiceid = await(async() => {
+					const exist = await table.findOne({where: {content: content, speaker: speakerid}});
+					if(exist == null){
+						const id = await table.create({content: content, speaker: speakerid, counter: 0});
+						const voice = await client.voicevox.createVoice(content, speakerid);
+						const voicepath = path(client.tempdir, `${id.dataValues.id}.wav`);
+						writeFileSync(voicepath, Buffer.from(voice));
+						await db.sync();
+						return voicepath;
+					}
+					else {
+						const voicepath = path(client.tempdir, `${exist.dataValues.id}.wav`);
+						exist.update({
+							counter: (exist.dataValues.counter + 1),
+						});
+						return voicepath
+					}
+				})();
+				const audio = createAudioResource(voiceid, {inlineVolume: true});
+				player.play(audio);
+			}
+		}
+		catch(e){
+			console.error(e);
 		}
 	},
 };

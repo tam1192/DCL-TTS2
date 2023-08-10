@@ -10,18 +10,26 @@ module.exports = {
 		.setDescription('vcから退出します。'),
 	async execute(interaction) {
 		const guildId = interaction.guild.id;
-		const vc = getVoiceConnection(guildId);
-		if (vc != undefined) {
-			vc.destroy();
-			interaction.guild.textlisten = '';
-			await interaction.reply({
-				content: 'vcから退出しました。',
-			});
+		try{
+			const vc = getVoiceConnection(guildId);
+			if (vc != undefined) {
+				vc.destroy();
+				interaction.guild.textlisten = '';
+				await interaction.reply({
+					content: 'vcから退出しました。',
+				});
+			}
+			else {
+				await interaction.reply({
+					content: 'vcに参加していません。',
+				});
+			}
 		}
-		else {
+		catch(e){
 			await interaction.reply({
-				content: 'vcに参加していません。',
+				content: 'エラーが発生しました。',
 			});
+			console.error(e);
 		}
 	},
 };
