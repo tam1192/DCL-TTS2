@@ -1,4 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
+const wait = require('timers/promises').setTimeout;
 
 const name = 'speaker';
 
@@ -35,5 +36,7 @@ module.exports = {
 			});
 			console.error(e);
 		}
+		await wait(10000);
+		await interaction.deleteReply();
 	},
 };

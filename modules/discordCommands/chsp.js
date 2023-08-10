@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { DataTypes } = require('sequelize');
+const wait = require('timers/promises').setTimeout;
 
 const columns = {
 	userid: {
@@ -72,5 +73,7 @@ module.exports = {
 				console.error(e);
 			}
 		}
+		await wait(10000);
+		await interaction.deleteReply();
 	},
 };
