@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getVoiceConnection } = require('@discordjs/voice');
+const wait = require('timers/promises').setTimeout;
 
 const name = 'leavevc';
 
@@ -31,5 +32,7 @@ module.exports = {
 			});
 			console.error(e);
 		}
+		await wait(10000);
+		await interaction.deleteReply();
 	},
 };

@@ -2,7 +2,6 @@
 
 const { ContextMenuCommandBuilder, SlashCommandBuilder, Routes } = require('discord.js');
 const { statSync } = require('fs-extra');
-const { Model, DataTypes } = require('sequelize');
 const crypto = require('crypto');
 
 module.exports = async(client) => {
@@ -12,25 +11,11 @@ module.exports = async(client) => {
 	 */
 	const commands = client.Commands;
 	const db = client.db;
+	const CommandsData = client.CommandsData;
 	const rest = client.rest;
 	const user = client.user;
 	const body = [];
 	const promises = [];
-
-	const columns = {
-		name: {
-			type: DataTypes.STRING,
-			primaryKey: true,
-		},
-		last: {
-			type: DataTypes.STRING,
-			allowNull: false,
-		}
-	}
-	/**
-	 * @type {Model}
-	 */
-	const table = db.define('Interactions', columns);
 
 	await db.sync();
 	
@@ -41,7 +26,6 @@ module.exports = async(client) => {
 			return crypto.createHash('sha1')
 					.update(JSON.stringify(data))
 					.digest('hex');
-			// const time = Math.floor(statSync(dir).mtimeMs * 1000);
 		})();
 
 		// 適切か
@@ -52,24 +36,19 @@ module.exports = async(client) => {
 
 		// profunc
 		const profunc = async() => {
-			const find = await table.findByPk(key);
-			// データが存在するか
-			if (find == null){
-				table.create({
-					name: key,
+			const commandsData = await CommandsData.findByPk(key) ?? CommandsData.build({
+				name: key,
+				last: '',
+			});
+			const last = commandsData.last;
+			// 更新日が新しくなっていないか。
+			if (last != mtime) {
+				CommandsData.update({
 					last: mtime,
+				}, {
+					where: {name: key}
 				});
 				throw 0;
-			} 
-			else {
-				const last = find.dataValues.last;
-				// 更新日が新しくなっていないか。
-				if (last != mtime) {
-						find.update({
-							last: mtime,
-						});
-					throw 0;
-				}
 			}
 			return 0;
 		}
@@ -77,6 +56,7 @@ module.exports = async(client) => {
 		promises.push(profunc());
 		return;
 	}
+
 	commands.forEach(cmdeach);
 
 	try{

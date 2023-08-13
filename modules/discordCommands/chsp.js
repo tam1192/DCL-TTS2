@@ -1,17 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { DataTypes } = require('sequelize');
+const { SlashCommandBuilder  } = require('discord.js');
 const wait = require('timers/promises').setTimeout;
-
-const columns = {
-	userid: {
-		type: DataTypes.INTEGER,
-		primaryKey: true
-	},
-	speaker: {
-		type: DataTypes.INTEGER,
-		allowNull: false,
-	},
-}
 
 const name = 'chsp';
 
@@ -34,45 +22,41 @@ module.exports = {
 			content: 'しばらくお待ちください。',
 			ephemeral: true,
 		});
+
 		const speakername = interaction.options.getString('speakername');
 		const styles = interaction.options.getString('styles') ?? 'ノーマル';
+
 		const user = interaction.user;
 		const client = interaction.client;
-		const db = client.db;
+
+		const UserData = client.UserData;
+		const userData = await UserData.findOne({
+			where: {
+				userid: user.id,
+			}
+		}) ?? await UserData.build({
+			userid: user.id,
+			speaker: 0,
+		});
+		await userData.save();
 
 		try{
-			const table = db.define('usersettings', columns);
-			await db.sync();
-
 			const speaker = await client.voicevox.createSpeaker();
 			const speakerid = speaker.searchId(speakername, styles);
-
-			const find = await table.findByPk(user.id);
-			if (find == null){
-				table.create({
-					userid: user.id,
-					speaker: speakerid,
-				});
-			}
-			else {
-				find.update({
-					speaker: speakerid,
-				});
-			}
-
-			await db.sync();
-			// interaction.user.speakerid = speakerid;
-			await interaction.editReply('変更しました。');
+			await UserData.update({ speaker:speakerid }, {
+				where: {userid: user.id}
+			});
+			// userData.update({
+			// 	speaker: speakerid
+			// });
 		}
 		catch(e){
 			if(e.message == 'not found'){
 				await interaction.editReply('話者が存在しません\nスタイルも確認してください。\n`/speaker` で話者を確認できます。');
 			}
-			else{
-				await interaction.editReply('変更できませんでした。');
-				console.error(e);
-			}
 		}
+
+		await interaction.editReply('変更しました。');
 		await wait(10000);
 		await interaction.deleteReply();
 	},

@@ -4,8 +4,6 @@
         "token": ""
     },
     "voicevox": {
-        "https": false,
-        "address": "",
-        "port": ""
+        "address": ""
     }
 }

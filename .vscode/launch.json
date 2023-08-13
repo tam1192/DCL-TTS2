@@ -4,6 +4,12 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "file",
+            "program": "${file}",
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch via NPM",
             "runtimeExecutable": "npm",
             "runtimeArgs": [

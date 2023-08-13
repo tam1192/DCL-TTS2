@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer } = require('@discordjs/voice');
+const wait = require('timers/promises').setTimeout;
 
 const name = 'joinvc';
 
@@ -37,5 +38,7 @@ module.exports = {
 				await interaction.editReply('参加できません\n権限は大丈夫ですか？');
 			}
 		}
+		await wait(10000);
+		await interaction.deleteReply();
 	},
 };
